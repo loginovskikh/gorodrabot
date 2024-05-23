@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Тестовое задание №2</title>
+</head>
+<body>
+    <form action="" method="post">
+        <input type="text" name="address" id="address" placeholder="Адрес">
+        <input type="button" name="submit" onclick="submitForm()" value="Найти">
+    </form>
+    <div id="addressDetails" hidden >
+    </div>
+</body>
+<script type="text/javascript">
+    async function submitForm() {
+        let addressDetails = document.getElementById('addressDetails');
+
+        addressDetails.innerHTML = '';
+        addressDetails.hidden = true;
+
+        let data = document.getElementById('address');
+        let body ={
+            address: data.value
+        }
+        let response = await fetch('', {
+            method: 'post',
+            body: JSON.stringify(body),
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+        if (response.status !== 200) {
+            try {
+                let responseData = await response.json();
+                if (responseData.message) {
+                    alert(responseData.message);
+                }
+            } catch (e) {
+                alert('Произошла ошибка, повторите попытку позже');
+            }
+        } else {
+            try {
+                let responseData = await response.json();
+
+                let street = document.createElement('p');
+                let house = document.createElement('p');
+                let metro = document.createElement('div');
+                let district = document.createElement('div')
+
+                street.innerHTML = responseData.street;
+                house.innerHTML = 'Дом ' + responseData.house;
+                metro.innerHTML = '<p>Ближайшие станции метро</p>';
+                district.innerHTML = '<p>Район города</p>';
+
+                let ulMetro = document.createElement('ul');
+                let ulDistrict = document.createElement('ul');
+
+                responseData.district.forEach(function (item, index, array) {
+                    let districtElem = document.createElement('li');
+                    districtElem.innerHTML = item
+                    ulDistrict.appendChild(districtElem)
+                });
+
+                responseData.metro.forEach(function (item, index, array) {
+                    let metroElem = document.createElement('li');
+                    metroElem.innerHTML = item
+                    ulMetro.appendChild(metroElem)
+                });
+
+                metro.appendChild(ulMetro);
+                district.appendChild(ulDistrict);
+
+                addressDetails.appendChild(street);
+                addressDetails.appendChild(house);
+                addressDetails.appendChild(district);
+                addressDetails.appendChild(metro);
+
+                addressDetails.hidden = false;
+            } catch (e) {
+                alert('Произошла ошибка, повторите попытку позже');
+            }
+        }
+    }
+
+</script>
+</html>

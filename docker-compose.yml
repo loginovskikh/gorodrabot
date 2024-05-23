@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  php:
+    build: docker/php
+    ports:
+      - "8081:80"
+    networks:
+      - internal
+    volumes:
+      - ./task2:/var/www/html/
+      - ./docker/php/conf/apache2/sites-enabled:/etc/apache2/sites-enabled/
+      - ./docker/php/conf/php/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: 3306
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    networks:
+      - internal
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./docker/db/mysql-init:/docker-entrypoint-initdb.d
+      - ./docker/db/mysql-volume:/var/lib/mysql
+
+networks:
+  internal:
+    driver: bridge
